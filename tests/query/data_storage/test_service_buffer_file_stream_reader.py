@@ -232,13 +232,14 @@ class TestServiceBufferFileStreamReader(unittest.TestCase):
             col = DbColumn()
             col.data_type = datatype
             col.provider = PG_PROVIDER_NAME
+
             test_columns_info = [col]
             reader = ServiceBufferFileStreamReader(self._dict_file_stream)
 
             res = reader.read_row(test_file_offset, test_row_id, test_columns_info)
 
             self.assertEqual(1, len(res))
-            self.assertEqual(self._dict_test_value, res[0].raw_object)
+            self.assertEqual(json.dumps(self._dict_test_value), res[0].raw_object)
 
     def test_read_numericrange(self):
         test_file_offset = 0

@@ -806,6 +806,7 @@ class TestConnectionCancellation(unittest.TestCase):
         # response has a connection id, indicating success.
         self.assertIs(self.connection_service.owner_to_connection_map[params.owner_uri].get_connection(params.type)._conn,
                       self.mock_psycopg_connection)
+
         self.assertIsNotNone(response.connection_id)
         self.assertIsNotNone(response.server_info.server_version)
         self.assertFalse(response.server_info.is_cloud)

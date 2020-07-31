@@ -3,44 +3,50 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from datetime import datetime
+import ntpath
 import threading
 import uuid
+from datetime import datetime
 from typing import Callable, Dict, List, Optional  # noqa
+
 import sqlparse
-import ntpath
 
-
+import ossdbtoolsservice.utils as utils
+from ossdbtoolsservice.connection.contracts import (ConnectionType,
+                                                    ConnectRequestParams)
+from ossdbtoolsservice.driver import ServerConnection
 from ossdbtoolsservice.hosting import RequestContext, ServiceProvider
 from ossdbtoolsservice.query import (
-    Batch, BatchEvents, ExecutionState, QueryExecutionSettings, Query, QueryEvents,
+    Batch, BatchEvents, ExecutionState, Query, QueryEvents,
+    QueryExecutionSettings, ResultSetStorageType)
+from ossdbtoolsservice.query import \
     compute_selection_data_for_batches as compute_batches
-)
-from ossdbtoolsservice.query.contracts import BatchSummary, ResultSetSubset, SelectionData, SaveResultsRequestParams, SubsetResult  # noqa
-from ossdbtoolsservice.query import ResultSetStorageType
-from ossdbtoolsservice.query_execution.contracts import (
-    EXECUTE_STRING_REQUEST, EXECUTE_DEPLOY_REQUEST, EXECUTE_DOCUMENT_SELECTION_REQUEST, ExecuteRequestParamsBase,
-    BATCH_START_NOTIFICATION, BATCH_COMPLETE_NOTIFICATION,
-    DEPLOY_BATCH_COMPLETE_NOTIFICATION, DEPLOY_BATCH_START_NOTIFICATION, EXECUTE_DOCUMENT_STATEMENT_REQUEST,
-    ExecuteDocumentStatementParams, ExecutionPlanOptions, ResultSetNotificationParams,
-    MESSAGE_NOTIFICATION, DEPLOY_MESSAGE_NOTIFICATION, RESULT_SET_AVAILABLE_NOTIFICATION, RESULT_SET_COMPLETE_NOTIFICATION, MessageNotificationParams,
-    QUERY_COMPLETE_NOTIFICATION, DEPLOY_COMPLETE_NOTIFICATION, QUERY_EXECUTION_PLAN_REQUEST, QueryCancelResult, QueryExecutionPlanRequest,
-    SUBSET_REQUEST, ExecuteDocumentSelectionParams, CANCEL_REQUEST, QueryCancelParams, ResultMessage, SubsetParams,
-    BatchNotificationParams, QueryCompleteNotificationParams, QueryDisposeParams,
-    DISPOSE_REQUEST, SIMPLE_EXECUTE_REQUEST, SimpleExecuteRequest, ExecuteStringParams,
-    SimpleExecuteResponse, SAVE_AS_CSV_REQUEST, SAVE_AS_JSON_REQUEST, SAVE_AS_EXCEL_REQUEST,
-    SaveResultsAsJsonRequestParams, SaveResultRequestResult,
-    SaveResultsAsCsvRequestParams, SaveResultsAsExcelRequestParams
-)
-
-from ossdbtoolsservice.driver import ServerConnection
-from ossdbtoolsservice.connection.contracts import ConnectRequestParams
-from ossdbtoolsservice.connection.contracts import ConnectionType
-import ossdbtoolsservice.utils as utils
+from ossdbtoolsservice.query.contracts import (BatchSummary,  # noqa
+                                               ResultSetSubset,
+                                               SaveResultsRequestParams,
+                                               SelectionData, SubsetResult)
 from ossdbtoolsservice.query.data_storage import (
-    FileStreamFactory, SaveAsCsvFileStreamFactory, SaveAsJsonFileStreamFactory, SaveAsExcelFileStreamFactory
-)
-
+    FileStreamFactory, SaveAsCsvFileStreamFactory,
+    SaveAsExcelFileStreamFactory, SaveAsJsonFileStreamFactory)
+from ossdbtoolsservice.query_execution.contracts import (
+    BATCH_COMPLETE_NOTIFICATION, BATCH_START_NOTIFICATION, CANCEL_REQUEST,
+    DEPLOY_BATCH_COMPLETE_NOTIFICATION, DEPLOY_BATCH_START_NOTIFICATION,
+    DEPLOY_COMPLETE_NOTIFICATION, DEPLOY_MESSAGE_NOTIFICATION, DISPOSE_REQUEST,
+    EXECUTE_DEPLOY_REQUEST, EXECUTE_DOCUMENT_SELECTION_REQUEST,
+    EXECUTE_DOCUMENT_STATEMENT_REQUEST, EXECUTE_STRING_REQUEST,
+    MESSAGE_NOTIFICATION, QUERY_COMPLETE_NOTIFICATION,
+    QUERY_EXECUTION_PLAN_REQUEST, RESULT_SET_AVAILABLE_NOTIFICATION,
+    RESULT_SET_COMPLETE_NOTIFICATION, SAVE_AS_CSV_REQUEST,
+    SAVE_AS_EXCEL_REQUEST, SAVE_AS_JSON_REQUEST, SIMPLE_EXECUTE_REQUEST,
+    SUBSET_REQUEST, BatchNotificationParams, ExecuteDocumentSelectionParams,
+    ExecuteDocumentStatementParams, ExecuteRequestParamsBase,
+    ExecuteStringParams, ExecutionPlanOptions, MessageNotificationParams,
+    QueryCancelParams, QueryCancelResult, QueryCompleteNotificationParams,
+    QueryDisposeParams, QueryExecutionPlanRequest, ResultMessage,
+    ResultSetNotificationParams, SaveResultRequestResult,
+    SaveResultsAsCsvRequestParams, SaveResultsAsExcelRequestParams,
+    SaveResultsAsJsonRequestParams, SimpleExecuteRequest,
+    SimpleExecuteResponse, SubsetParams)
 
 NO_QUERY_MESSAGE = 'QueryServiceRequestsNoQuery'
 
